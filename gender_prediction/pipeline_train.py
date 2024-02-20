@@ -1,4 +1,6 @@
 import os
+import subprocess
+import lightgbm as lgb
 
 from config.config import settings
 from config.log_config import logger
@@ -9,12 +11,22 @@ from gender_prediction.trainer import Trainer
 
 class GenderTraining:
 
-    def __init__(self, init_model=False):
+    def __init__(self, predict_mode=False):
+        self.predict_mode = predict_mode
+
         model_folder = os.path.join(settings.BASE_DIR, 'tmp')
         os.makedirs(model_folder, exist_ok=True)
         previous_model_path = os.path.join(model_folder, 'previous_model.txt')
         self.current_model_path = os.path.join(model_folder, 'model.txt')
 
+        # Rename model.txt to previous_model.txt
+        if os.path.exists(self.current_model_path):
+            subprocess.run(['mv',
+                            os.path.join(model_folder, 'model.txt'),
+                            os.path.join(model_folder, 'previous_model.txt')
+                            ])
+
+        init_model = False
         if os.path.exists(previous_model_path):
             init_model = True
 
@@ -29,10 +41,10 @@ class GenderTraining:
             'extra_trees': True,
             'metric': ['binary_logloss', 'auc', 'binary_error'],
             'num_class': 1,
-            'learning_rate': 0.01,
+            'learning_rate': 0.001,
             'max_depth': 6,
             'num_leaves': int(2 ** 6 / 2) + 5,
-            'min_data_in_leaf': 500,
+            'min_data_in_leaf': 100,
             'min_gain_to_split': 0.01,
             'feature_fraction': 0.5,
             'num_iterations': 1000,
@@ -43,15 +55,16 @@ class GenderTraining:
 
         self.best_params = {
             'boosting': 'gbdt',
-            'learning_rate': 0.09506659777596786,
+            'learning_rate':  0.0028,
             'max_depth': 8,
-            'num_leaves': 125,
-            'min_gain_to_split': 0.03760794223129103,
-            'feature_fraction': 0.6,
-            'bagging_fraction': 0.6,
-            'bagging_freq': 7,
-            'lambda_l1': 0.0001947897509552219,
-            'lambda_l2': 0.00019143792676796318,
+            'num_leaves': 127,
+            'min_data_in_leaf': 250,
+            'min_gain_to_split': 0.0260795,
+            'feature_fraction': 0.8,
+            'bagging_fraction': 0.7,
+            'bagging_freq': 5,
+            'lambda_l1': 6.193569680336381e-07,
+            'lambda_l2': 1.033342770081707e-06,
             'extra_trees': False,
             'max_bin': 64
         }
@@ -106,12 +119,17 @@ class GenderTraining:
                           init_model=self.init_model
                           )
         # trainer.train()
-        trainer.train_optuna(10)
+        trainer.train_optuna(20)
         trainer.save_model(self.current_model_path)
         trainer.plot_feature_importance()
 
         trainer.evaluate(X_test, y_test)
         trainer.plot_metric()
+
+    @staticmethod
+    def load_model(path):
+        logger.info("Loading model...")
+        return lgb.Booster(model_file=path)
 
     def run(self, train_path, label_path):
         raw_data = self.load_data(train_path, label_path)

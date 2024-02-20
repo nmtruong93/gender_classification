@@ -14,10 +14,6 @@ class DataProcessor:
                           'product_type_0', 'product_type_1', 'product_type_2']
         self.cat_cols = []
 
-        self.product_type_0 = None
-        self.product_type_1 = None
-        self.product_type_2 = None
-
     @staticmethod
     def get_cycled_feature_value_sin(col, max_value, epsilon=0.000001):
         value_scaled = (col + epsilon) / max_value
@@ -99,25 +95,33 @@ class DataProcessor:
 
         # List of all product categories
         if is_train_set:
-            self.product_type_0 = list(set(df['product_type_0'].sum()))
-            self.product_type_1 = list(set(df['product_type_1'].sum()))
-            self.product_type_2 = list(set(df['product_type_2'].sum()))
+            product_type_0 = list(set(df['product_type_0'].sum()))
+            product_type_1 = list(set(df['product_type_1'].sum()))
+            product_type_2 = list(set(df['product_type_2'].sum()))
             # product_type_3 = list(set(df['product_type_3'].sum()))
 
             # Save product type to pickle file for encode valid and test data
             with open(os.path.join(settings.BASE_DIR, 'product_type_0.pkl'), 'wb') as f:
-                pickle.dump(self.product_type_0, f)
+                pickle.dump(product_type_0, f)
             with open(os.path.join(settings.BASE_DIR, 'product_type_1.pkl'), 'wb') as f:
-                pickle.dump(self.product_type_1, f)
+                pickle.dump(product_type_1, f)
             with open(os.path.join(settings.BASE_DIR, 'product_type_2.pkl'), 'wb') as f:
-                pickle.dump(self.product_type_2, f)
+                pickle.dump(product_type_2, f)
+
+        else:
+            with open(os.path.join(settings.BASE_DIR, 'product_type_0.pkl'), 'rb') as f:
+                product_type_0 = pickle.load(f)
+            with open(os.path.join(settings.BASE_DIR, 'product_type_1.pkl'), 'rb') as f:
+                product_type_1 = pickle.load(f)
+            with open(os.path.join(settings.BASE_DIR, 'product_type_2.pkl'), 'rb') as f:
+                product_type_2 = pickle.load(f)
 
         # One hot encoding for product type
-        for p in self.product_type_0:
+        for p in product_type_0:
             df[f'product_type_0_{p}'] = df['product_type_0'].apply(lambda x: p in x).astype(int)
-        for p in self.product_type_1:
+        for p in product_type_1:
             df[f'product_type_1_{p}'] = df['product_type_1'].apply(lambda x: p in x).astype(int)
-        for p in self.product_type_2:
+        for p in product_type_2:
             df[f'product_type_2_{p}'] = df['product_type_2'].apply(lambda x: p in x).astype(int)
 
         return df.drop(self.drop_cols, axis=1)

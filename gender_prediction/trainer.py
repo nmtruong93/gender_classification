@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import lightgbm as lgb
 import optuna
-from sklearn.metrics import confusion_matrix, accuracy_score, classification_report, roc_auc_score
+from sklearn.metrics import confusion_matrix, accuracy_score, classification_report, roc_auc_score, f1_score
 
 from config.config import settings
 from config.log_config import logger
@@ -58,26 +58,24 @@ class Trainer:
         return self.model
 
     def objective(self, trial):
-        self.params['boosting'] = trial.suggest_categorical('boosting', ['gbdt', 'dart'])
-        self.params['learning_rate'] = trial.suggest_float('learning_rate', 0.01, 0.1, log=True)
+        self.params['learning_rate'] = trial.suggest_float('learning_rate', 0.001, 0.01, log=True)
         self.params['max_depth'] = trial.suggest_int('max_depth', 5, 12)
         self.params['num_leaves'] = trial.suggest_int('num_leaves', int(2 ** self.params['max_depth'] / 2) - 5,
                                                       int(2 ** self.params['max_depth'] / 2) + 5, step=2)
-        self.params['min_data_in_leaf'] = trial.suggest_int('min_data_in_leaf', 100, 1000, step=200)
+        self.params['min_data_in_leaf'] = trial.suggest_int('min_data_in_leaf', 100, 700, step=100)
         self.params['min_gain_to_split'] = trial.suggest_float('min_gain_to_split', 0.01, 0.1, log=True)
-        self.params['feature_fraction'] = trial.suggest_float('feature_fraction', 0.3, 0.8, step=0.1)
-        self.params['bagging_fraction'] = trial.suggest_float('bagging_fraction', 0.3, 0.8, step=0.1)
-        self.params['bagging_freq'] = trial.suggest_int('bagging_freq', 1, 10)
+        self.params['feature_fraction'] = trial.suggest_float('feature_fraction', 0.5, 0.8, step=0.1)
+        self.params['bagging_fraction'] = trial.suggest_float('bagging_fraction', 0.5, 0.8, step=0.1)
+        self.params['bagging_freq'] = trial.suggest_int('bagging_freq', 5, 10)
         self.params['lambda_l1'] = trial.suggest_float('lambda_l1', 1e-8, 10.0, log=True)
         self.params['lambda_l2'] = trial.suggest_float('lambda_l2', 1e-8, 10.0, log=True)
-        self.params['extra_trees'] = trial.suggest_categorical('extra_trees', [True, False])
-        self.params['max_bin'] = trial.suggest_int('max_bin', 64, 512, step=64)
+        self.params['max_bin'] = trial.suggest_int('max_bin', 8, 64, step=8)
 
         self.train()
         trial.set_user_attr('best_model', self.model)
 
-        auc = self.model.best_score['valid']['auc']
-        return auc
+        f1 = f1_score(self.y_valid, self.model.predict(self.X_valid) > 0.5)
+        return f1
 
     def train_optuna(self, n_trials=100):
         logger.info(f"Training optuna with params {self.params}")
