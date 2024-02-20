@@ -80,11 +80,3 @@ class DataLoader:
                     f"validation label ratio: {df_valid.label.value_counts(normalize=True).to_dict()}, "
                     f"test label ratio: {df_test.label.value_counts(normalize=True).to_dict()}")
         return df_train, df_valid, df_test
-
-
-# if __name__ == '__main__':
-#     train_path = os.path.join(settings.BASE_DIR, 'data', 'trainingData.csv')
-#     label_path = os.path.join(settings.BASE_DIR, 'data', 'trainingLabels.csv')
-#     data_loader = DataLoader(train_path=train_path, label_path=label_path)
-#     df = data_loader.load_data(nrows=None)
-#     df_train, df_valid, df_test = data_loader.train_valid_test_split(df, test_size=0.15, by_time=True, num_days=3)

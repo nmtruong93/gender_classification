@@ -101,19 +101,19 @@ class DataProcessor:
             # product_type_3 = list(set(df['product_type_3'].sum()))
 
             # Save product type to pickle file for encode valid and test data
-            with open(os.path.join(settings.BASE_DIR, 'product_type_0.pkl'), 'wb') as f:
+            with open(os.path.join(settings.BASE_DIR, 'tmp', 'product_type_0.pkl'), 'wb') as f:
                 pickle.dump(product_type_0, f)
-            with open(os.path.join(settings.BASE_DIR, 'product_type_1.pkl'), 'wb') as f:
+            with open(os.path.join(settings.BASE_DIR, 'tmp', 'product_type_1.pkl'), 'wb') as f:
                 pickle.dump(product_type_1, f)
-            with open(os.path.join(settings.BASE_DIR, 'product_type_2.pkl'), 'wb') as f:
+            with open(os.path.join(settings.BASE_DIR, 'tmp', 'product_type_2.pkl'), 'wb') as f:
                 pickle.dump(product_type_2, f)
 
         else:
-            with open(os.path.join(settings.BASE_DIR, 'product_type_0.pkl'), 'rb') as f:
+            with open(os.path.join(settings.BASE_DIR, 'tmp', 'product_type_0.pkl'), 'rb') as f:
                 product_type_0 = pickle.load(f)
-            with open(os.path.join(settings.BASE_DIR, 'product_type_1.pkl'), 'rb') as f:
+            with open(os.path.join(settings.BASE_DIR, 'tmp', 'product_type_1.pkl'), 'rb') as f:
                 product_type_1 = pickle.load(f)
-            with open(os.path.join(settings.BASE_DIR, 'product_type_2.pkl'), 'rb') as f:
+            with open(os.path.join(settings.BASE_DIR, 'tmp', 'product_type_2.pkl'), 'rb') as f:
                 product_type_2 = pickle.load(f)
 
         # One hot encoding for product type

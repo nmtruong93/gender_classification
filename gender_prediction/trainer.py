@@ -21,17 +21,18 @@ class Trainer:
                  y_valid=None,
                  init_model=None
                  ):
-        self.X_train = X_train
-        self.y_train = y_train
-        self.X_valid = X_valid
-        self.y_valid = y_valid
-        self.X_test = X_test
-        self.y_test = y_test
+        if X_train is not None:
+            self.X_train = X_train
+            self.y_train = y_train
+            self.X_valid = X_valid
+            self.y_valid = y_valid
+            self.X_test = X_test
+            self.y_test = y_test
 
-        self.cat_cols = cat_cols
-        self.params = params
-        self.evals_result = {}
-        self.init_model = init_model
+            self.cat_cols = cat_cols
+            self.params = params
+            self.evals_result = {}
+            self.init_model = init_model
 
         self.model = None
 
