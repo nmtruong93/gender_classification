@@ -21,7 +21,7 @@ class GenderTraining:
 
         # Rename model.txt to previous_model.txt
         if os.path.exists(self.current_model_path):
-            subprocess.run(['mv',
+            subprocess.run(['cp',
                             os.path.join(model_folder, 'model.txt'),
                             os.path.join(model_folder, 'previous_model.txt')
                             ])
