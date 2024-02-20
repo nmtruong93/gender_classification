@@ -47,6 +47,8 @@ Label:
 - Female: 0.0
 - Male: 1.0
 
+Overall Gender Score: 0.8182432554837475
+
 Overall metrics:
 ```angular2html
               precision    recall  f1-score   support

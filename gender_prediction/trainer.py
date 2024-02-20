@@ -75,8 +75,8 @@ class Trainer:
         self.train()
         trial.set_user_attr('best_model', self.model)
 
-        f1 = f1_score(self.y_valid, self.model.predict(self.X_valid) > 0.5)
-        return f1
+        score = self.score_gender(self.y_valid, self.model.predict(self.X_valid) > 0.5)
+        return score
 
     def train_optuna(self, n_trials=100):
         logger.info(f"Training optuna with params {self.params}")
@@ -93,6 +93,19 @@ class Trainer:
         y_pred = self.model.predict(X_test)
         return y_pred
 
+    def score_gender(self, y_test, y_pred):
+        """
+        Calculate gender ratio: score = ((male_correct / male_total) + (female_correct / female_total)) / 2
+        :param y_test: pd.Series, the testing target
+        :param y_pred: pd.Series, the predicted target
+        :return: float,
+        """
+        score = ((y_test[y_test == 1] == y_pred[y_test == 1]).sum() / y_test[y_test == 1].shape[0] +
+                    (y_test[y_test == 0] == y_pred[y_test == 0]).sum() / y_test[y_test == 0].shape[0]) / 2
+
+        logger.info(f"Genders score: {score}")
+        return score
+
     def evaluate(self, X_test, y_test, threshold=0.5):
         """
         Evaluate the model
@@ -104,6 +117,8 @@ class Trainer:
         logger.info("Start evaluating...")
         y_pred_probs = self.model.predict(X_test)
         y_pred = np.where(y_pred_probs > threshold, 1, 0)
+
+        self.score_gender(y_test, y_pred)
 
         logger.info(f"Accuracy score: {accuracy_score(y_test, y_pred)}| AUC: {roc_auc_score(y_test, y_pred_probs)}")
         logger.info(f"Classification report:")
