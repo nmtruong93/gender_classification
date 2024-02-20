@@ -1,14 +1,22 @@
+import os
+import pickle
 import numpy as np
 from tqdm import tqdm
 
+from config.config import settings
 from config.log_config import logger
 tqdm.pandas()
 
 
 class DataProcessor:
     def __init__(self):
-        self.drop_cols = ['session_id', 'start_time', 'end_time', 'product_viewed', 'product_list']
+        self.drop_cols = ['session_id', 'start_time', 'end_time', 'product_viewed', 'product_list',
+                          'product_type_0', 'product_type_1', 'product_type_2']
         self.cat_cols = []
+
+        self.product_type_0 = None
+        self.product_type_1 = None
+        self.product_type_2 = None
 
     @staticmethod
     def get_cycled_feature_value_sin(col, max_value, epsilon=0.000001):
@@ -71,10 +79,11 @@ class DataProcessor:
         """
         return [y.split('/')[level] for y in x]
 
-    def get_session_features(self, df):
+    def get_product_features(self, df, is_train_set=False):
         """
-        Get session features
+        Get product features
         :param df: pd.DataFrame
+        :param is_train_set: bool, default=False. If True, process for train set
         :return: pd.DataFrame
         """
         logger.info("Get session features...")
@@ -82,26 +91,33 @@ class DataProcessor:
         df['num_products'] = df['product_list'].apply(lambda x: len(x))
         df['num_unique_products'] = df['product_list'].apply(lambda x: len(set(x)))
 
-        # TODO: One hot encoding for product type
         # Get all level product categories
-        # df['product_type_0'] = df['product_list'].apply(lambda x: self.get_product_type(x, 0))
-        # df['product_type_1'] = df['product_list'].apply(lambda x: self.get_product_type(x, 1))
-        # df['product_type_2'] = df['product_list'].apply(lambda x: self.get_product_type(x, 2))
+        df['product_type_0'] = df['product_list'].apply(lambda x: self.get_product_type(x, 0))
+        df['product_type_1'] = df['product_list'].apply(lambda x: self.get_product_type(x, 1))
+        df['product_type_2'] = df['product_list'].apply(lambda x: self.get_product_type(x, 2))
         # df['product_type_3'] = df['product_list'].apply(lambda x: self.get_product_type(x, 3))
 
         # List of all product categories
-        # product_type_0 = list(set(df['product_type_0'].sum()))
-        # product_type_1 = list(set(df['product_type_1'].sum()))
-        # product_type_2 = list(set(df['product_type_2'].sum()))
-        # product_type_3 = list(set(df['product_type_3'].sum()))
-        #
-        # # One hot encoding for product type
-        # for p in product_type_0:
-        #     df[f'product_type_0_{p}'] = df['product_type_0'].apply(lambda x: p in x).astype(int)
-        # for p in product_type_1:
-        #     df[f'product_type_1_{p}'] = df['product_type_1'].apply(lambda x: p in x).astype(int)
-        # for p in product_type_2:
-        #     df[f'product_type_2_{p}'] = df['product_type_2'].apply(lambda x: p in x).astype(int)
-        # for p in product_type_3:
-        #     df[f'product_type_3_{p}'] = df['product_type_3'].apply(lambda x: p in x).astype(int)
+        if is_train_set:
+            self.product_type_0 = list(set(df['product_type_0'].sum()))
+            self.product_type_1 = list(set(df['product_type_1'].sum()))
+            self.product_type_2 = list(set(df['product_type_2'].sum()))
+            # product_type_3 = list(set(df['product_type_3'].sum()))
+
+            # Save product type to pickle file for encode valid and test data
+            with open(os.path.join(settings.BASE_DIR, 'product_type_0.pkl'), 'wb') as f:
+                pickle.dump(self.product_type_0, f)
+            with open(os.path.join(settings.BASE_DIR, 'product_type_1.pkl'), 'wb') as f:
+                pickle.dump(self.product_type_1, f)
+            with open(os.path.join(settings.BASE_DIR, 'product_type_2.pkl'), 'wb') as f:
+                pickle.dump(self.product_type_2, f)
+
+        # One hot encoding for product type
+        for p in self.product_type_0:
+            df[f'product_type_0_{p}'] = df['product_type_0'].apply(lambda x: p in x).astype(int)
+        for p in self.product_type_1:
+            df[f'product_type_1_{p}'] = df['product_type_1'].apply(lambda x: p in x).astype(int)
+        for p in self.product_type_2:
+            df[f'product_type_2_{p}'] = df['product_type_2'].apply(lambda x: p in x).astype(int)
+
         return df.drop(self.drop_cols, axis=1)

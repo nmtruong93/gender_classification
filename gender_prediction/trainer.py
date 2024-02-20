@@ -63,7 +63,7 @@ class Trainer:
         self.params['max_depth'] = trial.suggest_int('max_depth', 5, 12)
         self.params['num_leaves'] = trial.suggest_int('num_leaves', int(2 ** self.params['max_depth'] / 2) - 5,
                                                       int(2 ** self.params['max_depth'] / 2) + 5, step=2)
-        self.params['min_data_in_leaf'] = trial.suggest_int('min_data_in_leaf', 1000, 5000, step=500)
+        self.params['min_data_in_leaf'] = trial.suggest_int('min_data_in_leaf', 100, 1000, step=200)
         self.params['min_gain_to_split'] = trial.suggest_float('min_gain_to_split', 0.01, 0.1, log=True)
         self.params['feature_fraction'] = trial.suggest_float('feature_fraction', 0.3, 0.8, step=0.1)
         self.params['bagging_fraction'] = trial.suggest_float('bagging_fraction', 0.3, 0.8, step=0.1)

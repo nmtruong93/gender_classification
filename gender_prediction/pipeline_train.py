@@ -32,7 +32,7 @@ class GenderTraining:
             'learning_rate': 0.01,
             'max_depth': 6,
             'num_leaves': int(2 ** 6 / 2) + 5,
-            'min_data_in_leaf': 5000,
+            'min_data_in_leaf': 500,
             'min_gain_to_split': 0.01,
             'feature_fraction': 0.5,
             'num_iterations': 1000,
@@ -67,21 +67,31 @@ class GenderTraining:
 
         return train_df, valid_df, test_df
 
-    @staticmethod
-    def process_data(train_df, valid_df, test_df):
+    def process_data(self, train_df, valid_df, test_df):
         data_processor = DataProcessor()
 
         df_train = data_processor.get_time_features(train_df)
         df_valid = data_processor.get_time_features(valid_df)
         df_test = data_processor.get_time_features(test_df)
 
-        df_train = data_processor.get_session_features(df_train)
-        df_valid = data_processor.get_session_features(df_valid)
-        df_test = data_processor.get_session_features(df_test)
+        df_train = data_processor.get_product_features(df_train, is_train_set=True)
+        df_valid = data_processor.get_product_features(df_valid)
+        df_test = data_processor.get_product_features(df_test)
 
         X_train, y_train = df_train.drop(['label'], axis=1), df_train['label']
         X_valid, y_valid = df_valid.drop(['label'], axis=1), df_valid['label']
         X_test, y_test = df_test.drop(['label'], axis=1), df_test['label']
+
+        # Cast categorical columns to category type
+        time_cat_cols = ['quarter', 'month', 'week', 'day', 'hour', 'minute', 'daysinmonth', 'dayofweek']
+        product_cat_cols = [col for col in X_train.columns if 'product_type' in col]
+        self.cat_cols = time_cat_cols + product_cat_cols
+
+        for col in self.cat_cols:
+            X_train[col] = X_train[col].astype('category')
+            X_valid[col] = X_valid[col].astype('category')
+            X_test[col] = X_test[col].astype('category')
+
         return X_train, X_test, X_valid, y_train, y_test, y_valid
 
     def train(self, X_train, X_test, X_valid, y_train, y_test, y_valid):
@@ -98,7 +108,7 @@ class GenderTraining:
         # trainer.train()
         trainer.train_optuna(10)
         trainer.save_model(self.current_model_path)
-        # trainer.plot_feature_importance()
+        trainer.plot_feature_importance()
 
         trainer.evaluate(X_test, y_test)
         trainer.plot_metric()
