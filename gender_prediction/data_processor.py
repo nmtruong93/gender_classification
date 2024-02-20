@@ -36,7 +36,7 @@ class DataProcessor:
         logger.info("Get time features...")
         df['quarter'] = df[time_col].dt.quarter
         df['month'] = df[time_col].dt.month
-        df['week'] = df[time_col].dt.week
+        df['week'] = df[time_col].dt.weekday
         df['day'] = df[time_col].dt.day
         df['hour'] = df[time_col].dt.hour
         df['minute'] = df[time_col].dt.minute

@@ -11,8 +11,8 @@ from gender_prediction.trainer import Trainer
 
 class GenderTraining:
 
-    def __init__(self, predict_mode=False):
-        self.predict_mode = predict_mode
+    def __init__(self, is_tune_optuna=False):
+        self.is_tune_optuna = is_tune_optuna
 
         model_folder = os.path.join(settings.BASE_DIR, 'tmp')
         os.makedirs(model_folder, exist_ok=True)
@@ -118,8 +118,12 @@ class GenderTraining:
                           y_valid,
                           init_model=self.init_model
                           )
-        # trainer.train()
-        trainer.train_optuna(20)
+
+        if self.is_tune_optuna:
+            trainer.train_optuna(20)
+        else:
+            trainer.train()
+
         trainer.save_model(self.current_model_path)
         trainer.plot_feature_importance()
 
@@ -140,5 +144,5 @@ class GenderTraining:
 if __name__ == '__main__':
     train_path = os.path.join(settings.BASE_DIR, 'data', 'trainingData.csv')
     label_path = os.path.join(settings.BASE_DIR, 'data', 'trainingLabels.csv')
-    pipeline = GenderTraining()
+    pipeline = GenderTraining(is_tune_optuna=True)
     pipeline.run(train_path, label_path)

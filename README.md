@@ -34,6 +34,10 @@
         
       python gender_prediction/pipeline_train.py
      ```
+   Please note that the training process will take a few minutes to complete. 
+   We use Optuna to find the best hyperparameters for the model.
+    
+
 6. The trained model will be saved in the `tmp` folder
 
 ### Prediction process
