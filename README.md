@@ -38,3 +38,19 @@
 
 ### Prediction process
 Run the file [pipeline_prediction.py](gender_prediction%2Fpipeline_prediction.py)
+
+Label:
+- Female: 0.0
+- Male: 1.0
+
+Overall metrics:
+```angular2html
+              precision    recall  f1-score   support
+
+         0.0       0.91      0.97      0.94     11703
+         1.0       0.88      0.68      0.76      3297
+
+    accuracy                           0.91     15000
+   macro avg       0.90      0.82      0.85     15000
+weighted avg       0.91      0.91      0.90     15000
+```
