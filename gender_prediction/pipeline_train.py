@@ -47,7 +47,7 @@ class GenderTraining:
             'min_data_in_leaf': 100,
             'min_gain_to_split': 0.01,
             'feature_fraction': 0.5,
-            'num_iterations': 1000,
+            'num_iterations': 2000,
             'first_metric_only': False,
             'num_threads': 8,
             'seed': 4

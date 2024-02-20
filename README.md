@@ -47,16 +47,16 @@ Label:
 - Female: 0.0
 - Male: 1.0
 
-Overall Gender Score: 0.8182432554837475
+Overall Gender Score: 0.8257492829234192
 
 Overall metrics:
 ```angular2html
               precision    recall  f1-score   support
 
-         0.0       0.91      0.97      0.94     11703
-         1.0       0.88      0.68      0.76      3297
+         0.0       0.91      0.98      0.94     11703
+         1.0       0.89      0.68      0.77      3297
 
     accuracy                           0.91     15000
-   macro avg       0.90      0.82      0.85     15000
-weighted avg       0.91      0.91      0.90     15000
+   macro avg       0.90      0.83      0.86     15000
+weighted avg       0.91      0.91      0.91     15000
 ```
